@@ -56,18 +56,18 @@ namespace ElevatorsInSpecialRooms
 		//static void ChangeThisToTrue(EnvironmentController __instance) =>
 		//	__instance.instantiateTiles = true;
 
-		[HarmonyPatch("Start")]
-		[HarmonyPostfix]
-		static void JustDoIt(LevelBuilder __instance)
-		{
-			if (!__instance.ld) return;
+		//[HarmonyPatch("Start")]
+		//[HarmonyPostfix]
+		//static void JustDoIt(LevelBuilder __instance)
+		//{
+		//	if (!__instance.ld) return;
 
-			__instance.ld.exitCount = 4;
-			__instance.ld.minSpecialRooms = 2;
-			__instance.ld.maxSpecialRooms = 2;
-			__instance.ld.specialRoomsStickToEdge = true;
-			__instance.ld.potentialSpecialRooms.DoIf(x => x.selection.name.Contains("Cafeteria"), x => x.weight = 99999);
-		}
+		//	__instance.ld.exitCount = 4;
+		//	__instance.ld.minSpecialRooms = 2;
+		//	__instance.ld.maxSpecialRooms = 2;
+		//	__instance.ld.specialRoomsStickToEdge = true;
+		//	__instance.ld.potentialSpecialRooms.DoIf(x => x.selection.name.Contains("Cafeteria"), x => x.weight = 99999);
+		//}
 
 		[HarmonyPatch("RoomFits")]
 		[HarmonyPostfix]
