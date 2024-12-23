@@ -63,10 +63,9 @@ namespace ElevatorsInSpecialRooms
 		//	if (!__instance.ld) return;
 
 		//	__instance.ld.exitCount = 4;
-		//	__instance.ld.minSpecialRooms = 2;
-		//	__instance.ld.maxSpecialRooms = 2;
-		//	__instance.ld.specialRoomsStickToEdge = true;
-		//	__instance.ld.potentialSpecialRooms.DoIf(x => x.selection.name.Contains("Cafeteria"), x => x.weight = 99999);
+		//	__instance.ld.minSpecialRooms = 5;
+		//	__instance.ld.maxSpecialRooms = 5;
+		//	__instance.ld.specialRoomsStickToEdge = true; // seed 687 for Times to test
 		//}
 
 		[HarmonyPatch("RoomFits")]
@@ -75,18 +74,21 @@ namespace ElevatorsInSpecialRooms
 		{
 			if (!__result || roomAsset != __instance.ld.elevatorRoom)
 				return;
-
+			//Debug.Log("----- CHECKING ELEVATOR FOR DIRECTION " + direction + " -----");
 			foreach (CellData cellData in roomAsset.cells)
 			{
 				var actualPos = position + cellData.pos.Adjusted(roomAsset.potentialDoorPositions[0], direction) + direction.ToIntVector2();
-				if (__instance.Ec.CellFromPosition(actualPos).room &&
-					__instance.Ec.CellFromPosition(actualPos).room.type == RoomType.Room &&
+				var cell = __instance.Ec.CellFromPosition(actualPos);
+				var room = cell.room;
 
-					(__instance.Ec.CellFromPosition(actualPos).room.functions?.functions?.Exists(fun => fun is SkyboxRoomFunction) ?? false ||
-					__instance.Ec.CellFromPosition(actualPos).hideFromMap ||
-					!__instance.Ec.CellFromPosition(actualPos).room.entitySafeCells.Contains(actualPos))
-					)
+				//Debug.Log($"Positions checked: {actualPos.ToString()} and room ({(room.name)})");
+
+				if (room.type != RoomType.Room)
+					continue;
+				
+				if ((room.functions?.functions?.Exists(fun => fun is SkyboxRoomFunction) ?? false) || cell.hideFromMap || !room.entitySafeCells.Contains(actualPos))
 				{
+					//Debug.Log("Invalid position to be in");
 					__result = false;
 					return;
 				}
