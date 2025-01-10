@@ -64,17 +64,17 @@ namespace ElevatorsInSpecialRooms
 		//static void ChangeThisToTrue(EnvironmentController __instance) =>
 		//	__instance.instantiateTiles = true;
 
-		[HarmonyPatch("Start")]
-		[HarmonyPostfix]
-		static void JustDoIt(LevelBuilder __instance)
-		{
-			if (!__instance.ld) return;
+		//[HarmonyPatch("Start")]
+		//[HarmonyPostfix]
+		//static void JustDoIt(LevelBuilder __instance)
+		//{
+		//	if (!__instance.ld) return;
 
-			__instance.ld.exitCount = 4;
-			__instance.ld.minSpecialRooms = 1;
-			__instance.ld.maxSpecialRooms = 2;
-			__instance.ld.specialRoomsStickToEdge = true; // seed 687 for Times to test
-		}
+		//	__instance.ld.exitCount = 4;
+		//	__instance.ld.minSpecialRooms = 1;
+		//	__instance.ld.maxSpecialRooms = 2;
+		//	__instance.ld.specialRoomsStickToEdge = true; // seed 687 for Times to test
+		//}
 
 		[HarmonyPatch("RoomFits")]
 		[HarmonyPostfix]
