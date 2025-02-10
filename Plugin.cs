@@ -109,7 +109,7 @@ namespace ElevatorsInSpecialRooms
 		}
 
 
-		[HarmonyPatch("LoadRoom")]
+		[HarmonyPatch("LoadRoom", [typeof(RoomAsset), typeof(IntVector2), typeof(IntVector2), typeof(Direction), typeof(bool), typeof(Texture2D), typeof(Texture2D), typeof(Texture2D)])] // that's a method with a LOT of parameters
 		[HarmonyPostfix]
 		static void SpecialRoomHasExits(RoomController __result) =>
 			__result.acceptsExits = __result.category == RoomCategory.Special && !Plugin.IsProhibitedSpecialRoomPrefix(__result.name);
