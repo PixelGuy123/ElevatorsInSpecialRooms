@@ -24,19 +24,16 @@ namespace ElevatorsInSpecialRooms
 			h.PatchAll();
 		}
 
-		public static void AddProhibitedSpecialRoomPrefix(string prefix) =>
-			prohibitedNames.Add(prefix.ToLower());
-		internal static bool IsProhibitedSpecialRoomPrefix(string name)
-		{
-			name = name.ToLower();
-			return prohibitedNames.Exists(pre => name.Contains(pre));
-		}
 		internal static void AddNonAllowedRoomFunction(System.Type roomFunc) =>
 			nonAllowedRoomFuncTypes.Add(roomFunc);
 		internal static bool IsRoomFuncAllowedToReInitialize(System.Type roomFunc) =>
 			!nonAllowedRoomFuncTypes.Contains(roomFunc);
 
-		internal static List<string> prohibitedNames = ["library", "playground"];
+
+		internal static HashSet<System.Type> prohibitedFunctions = [
+			typeof(SkyboxRoomFunction),
+			typeof(SilenceRoomFunction)
+			];
 
 		internal static HashSet<System.Type> nonAllowedRoomFuncTypes = [
 			typeof(DetentionRoomFunction),
@@ -96,8 +93,7 @@ namespace ElevatorsInSpecialRooms
 				if (room.type != RoomType.Room)
 					continue;
 
-				if ((room.functions?.functions?.Exists(fun => fun is SkyboxRoomFunction) ?? false) ||
-					cell.hideFromMap ||
+				if (cell.hideFromMap ||
 					!room.potentialDoorPositions.Contains(actualPos)) // It should be potential doors, why did I put entity safe cells lmao
 				{
 					//Debug.Log("Invalid position to be in");
@@ -112,8 +108,8 @@ namespace ElevatorsInSpecialRooms
 		[HarmonyPatch("LoadRoom", [typeof(RoomAsset), typeof(IntVector2), typeof(IntVector2), typeof(Direction), typeof(bool), typeof(Texture2D), typeof(Texture2D), typeof(Texture2D)])] // that's a method with a LOT of parameters
 		[HarmonyPostfix]
 		static void SpecialRoomHasExits(RoomController __result) =>
-			__result.acceptsExits = __result.category == RoomCategory.Special && !Plugin.IsProhibitedSpecialRoomPrefix(__result.name);
-
+			__result.acceptsExits = __result.category == RoomCategory.Special && (!__result.functions?.functions?.Exists(fun => Plugin.prohibitedFunctions.Contains(fun.GetType())) ?? false);
+		// Exists function checks if there isn't any room function that could potentially break the gameplay if an elevator spawned in it
 
 		[HarmonyPatch("CreateElevator")]
 		[HarmonyPrefix] // very important, to properly adapt
