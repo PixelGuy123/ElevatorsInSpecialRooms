@@ -209,12 +209,12 @@ namespace ElevatorsInSpecialRooms
 	{
 		readonly static System.Type genEnum = AccessTools.EnumeratorMoveNext(AccessTools.Method(typeof(LevelGenerator), "Generate")).DeclaringType;
 
-		readonly static FieldInfo successField = AccessTools.Field(genEnum, "<success>5__61"),
-			connectDirField = AccessTools.Field(genEnum, "<connectDir>5__64"),
-			potentialSpawns = AccessTools.Field(genEnum, "<potentialSpawns>5__66"),
-			xField = AccessTools.Field(genEnum, "<x>5__59"),
-			zField = AccessTools.Field(genEnum, "<z>5__54"),
-			valField = AccessTools.Field(genEnum, "<val>5__58");
+		readonly static FieldInfo successField = AccessTools.Field(genEnum, "<success>5__62"),
+			connectDirField = AccessTools.Field(genEnum, "<connectDir>5__65"),
+			potentialSpawns = AccessTools.Field(genEnum, "<potentialSpawns>5__67"),
+			xField = AccessTools.Field(genEnum, "<x>5__60"),
+			zField = AccessTools.Field(genEnum, "<z>5__55"),
+			valField = AccessTools.Field(genEnum, "<val>5__59");
 
 		[HarmonyTranspiler]
 		static IEnumerable<CodeInstruction> ComplexTranspiler(IEnumerable<CodeInstruction> i) =>
