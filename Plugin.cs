@@ -1,9 +1,9 @@
-﻿using BepInEx;
-using BepInEx.Configuration;
-using HarmonyLib;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using BepInEx;
+using BepInEx.Configuration;
+using HarmonyLib;
 using UnityEngine;
 
 namespace ElevatorsInSpecialRooms
@@ -24,7 +24,7 @@ namespace ElevatorsInSpecialRooms
 			h.PatchAll();
 		}
 
-		internal static void AddNonAllowedRoomFunction(System.Type roomFunc) =>
+		public static void AddNonAllowedRoomFunction(System.Type roomFunc) =>
 			nonAllowedRoomFuncTypes.Add(roomFunc);
 		internal static bool IsRoomFuncAllowedToReInitialize(System.Type roomFunc) =>
 			!nonAllowedRoomFuncTypes.Contains(roomFunc);
@@ -54,32 +54,55 @@ namespace ElevatorsInSpecialRooms
 	}
 
 	[HarmonyPatch(typeof(LevelBuilder))]
-	internal static class ElevatorsInSpecialRooms
+	internal static class LevelBuilderPatch
 	{
-		//[HarmonyPatch(typeof(EnvironmentController), "SetTileInstantiation")]
-		//[HarmonyPostfix]
-		//static void ChangeThisToTrue(EnvironmentController __instance) =>
-		//	__instance.instantiateTiles = true;
+		// [HarmonyPatch(typeof(PlayerMovement), nameof(PlayerMovement.PlayerMove))]
+		// [HarmonyPrefix]
+		// static void GetPosition(PlayerMovement __instance)
+		// {
+		// 	if (Input.GetKeyDown(KeyCode.F))
+		// 		Debug.LogError("Player pos is: " + IntVector2.GetGridPosition(__instance.transform.position).ToString());
+		// }
 
-		//[HarmonyPatch("Start")]
-		//[HarmonyPostfix]
-		//static void JustDoIt(LevelBuilder __instance)
-		//{
-		//	if (!__instance.ld) return;
+		// // [HarmonyPatch(typeof(EnvironmentController), "SetTileInstantiation")]
+		// // [HarmonyPostfix]
+		// // static void ChangeThisToTrue(EnvironmentController __instance) =>
+		// // 	__instance.instantiateTiles = true;
 
-		//	__instance.ld.exitCount = 4;
-		//	__instance.ld.minSpecialRooms = 1;
-		//	__instance.ld.maxSpecialRooms = 2;
-		//	__instance.ld.specialRoomsStickToEdge = true; // seed 687 for Times to test
-		//}
+		// [HarmonyPatch("Start")]
+		// [HarmonyPostfix]
+		// static void JustDoIt(LevelBuilder __instance)
+		// {
+		// 	if (!__instance.ld) return;
+
+		// 	__instance.ld.exitCount = 4;
+		// 	__instance.ld.minSpecialRooms = 1;
+		// 	//__instance.ld.maxSpecialRooms = 2;
+		// 	//__instance.ld.specialRoomsStickToEdge = true; // seed 687 for Times to test
+		// }
 
 		[HarmonyPatch("RoomFits")]
-		[HarmonyPostfix]
-		static void DoesElevatorsFit(LevelBuilder __instance, RoomAsset roomAsset, IntVector2 position, ref Direction direction, ref bool __result)
+		[HarmonyPrefix]
+		static bool FixElevatorRoom(LevelBuilder __instance, RoomAsset roomAsset, IntVector2 position, IntVector2 pivot, ref Direction direction, ref bool __result)
 		{
+			if (roomAsset != __instance.ld.elevatorRoom) return true;
 
-			if (!__result || roomAsset != __instance.ld.elevatorRoom)
-				return;
+			__result = true;
+
+			foreach (CellData cellData in roomAsset.cells)
+			{
+				IntVector2 intVector = cellData.pos.Adjusted(pivot, direction) + position;
+				if (!__instance.ec.ContainsCoordinates(intVector) ||
+				!__instance.ec.CellFromPosition(intVector).Null
+				)
+				{
+					//Debug.Log("invalid room name: " + __instance.ec.CellFromPosition(intVector).room.name);
+					__result = false;
+					return false;
+				}
+			}
+
+			//Debug.Log("----------- POSITION: " + position.ToString() + "----------");
 			//Debug.Log("----- CHECKING ELEVATOR FOR DIRECTION " + direction + " -----");
 
 			foreach (CellData cellData in roomAsset.cells)
@@ -98,10 +121,12 @@ namespace ElevatorsInSpecialRooms
 				{
 					//Debug.Log("Invalid position to be in");
 					__result = false;
-					return;
+					return false;
 				}
 			}
+			//Debug.Log("Position is suitable: " + isThisElevatorSuitableForRooms);
 
+			return false;
 		}
 
 
@@ -109,6 +134,8 @@ namespace ElevatorsInSpecialRooms
 		[HarmonyPostfix]
 		static void SpecialRoomHasExits(RoomController __result) =>
 			__result.acceptsExits = __result.category == RoomCategory.Special && (!__result.functions?.functions?.Exists(fun => Plugin.prohibitedFunctions.Contains(fun.GetType())) ?? false);
+
+
 		// Exists function checks if there isn't any room function that could potentially break the gameplay if an elevator spawned in it
 
 		[HarmonyPatch("CreateElevator")]
@@ -280,6 +307,18 @@ namespace ElevatorsInSpecialRooms
 				new(OpCodes.Ldc_I4_0),
 				new(CodeInstruction.StoreField(typeof(RoomController), "acceptsExits")))
 			.SetInstruction(Transpilers.EmitDelegate(() => Plugin.allowMultipleElevatorsInSameSpot.Value))
+
+
+			// ************ Flag correction **************
+
+			.MatchBack(false, new(OpCodes.Ldc_I4_0), new(OpCodes.Stloc_S, name: "V_58"))
+			.SetInstruction(new(OpCodes.Ldc_I4_1)) // AnyHardCoverage check removal
+
+			.MatchBack(false, new(OpCodes.Ldc_I4_0), new(OpCodes.Stloc_S, name: "V_58")) // Locked check removal
+			.SetInstruction(new(OpCodes.Ldc_I4_1)) // Set the locked check to always be true regardless
+
+			.MatchBack(false, new(OpCodes.Ldc_I4_0), new(OpCodes.Stloc_S, name: "V_58")) // Cell check here
+			.SetInstruction(new(OpCodes.Ldc_I4_1))
 
 			.InstructionEnumeration();
 
