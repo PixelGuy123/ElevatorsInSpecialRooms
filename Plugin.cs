@@ -56,13 +56,13 @@ namespace ElevatorsInSpecialRooms
 	[HarmonyPatch(typeof(LevelBuilder))]
 	internal static class LevelBuilderPatch
 	{
-		// [HarmonyPatch(typeof(PlayerMovement), nameof(PlayerMovement.PlayerMove))]
-		// [HarmonyPrefix]
-		// static void GetPosition(PlayerMovement __instance)
-		// {
-		// 	if (Input.GetKeyDown(KeyCode.F))
-		// 		Debug.LogError("Player pos is: " + IntVector2.GetGridPosition(__instance.transform.position).ToString());
-		// }
+		[HarmonyPatch(typeof(PlayerMovement), nameof(PlayerMovement.PlayerMove))]
+		[HarmonyPrefix]
+		static void GetPosition(PlayerMovement __instance)
+		{
+			if (Input.GetKeyDown(KeyCode.F))
+				Debug.LogError("Player pos is: " + IntVector2.GetGridPosition(__instance.transform.position).ToString());
+		}
 
 		// // [HarmonyPatch(typeof(EnvironmentController), "SetTileInstantiation")]
 		// // [HarmonyPostfix]
@@ -96,14 +96,16 @@ namespace ElevatorsInSpecialRooms
 				!__instance.ec.CellFromPosition(intVector).Null
 				)
 				{
-					//Debug.Log("invalid room name: " + __instance.ec.CellFromPosition(intVector).room.name);
+					Debug.Log("invalid room name: " + __instance.ec.CellFromPosition(intVector).room.name);
 					__result = false;
 					return false;
 				}
 			}
 
-			//Debug.Log("----------- POSITION: " + position.ToString() + "----------");
-			//Debug.Log("----- CHECKING ELEVATOR FOR DIRECTION " + direction + " -----");
+			Debug.Log("----------- POSITION: " + position.ToString() + "----------");
+			Debug.Log("----- CHECKING ELEVATOR FOR DIRECTION " + direction + " -----");
+
+			bool detectedARoom = false, detectedAHall = false;
 
 			foreach (CellData cellData in roomAsset.cells)
 			{
@@ -111,20 +113,30 @@ namespace ElevatorsInSpecialRooms
 				var cell = __instance.Ec.CellFromPosition(actualPos);
 				var room = cell.room;
 
-				//Debug.Log($"Positions checked: {actualPos.ToString()} and room ({(room.name)})");
+				Debug.Log($"Positions checked: {actualPos.ToString()} and room ({(room.name)})");
 
-				if (room.type != RoomType.Room)
+				if (room.type != RoomType.Room) // Hallway
+				{
+					detectedAHall = true;
 					continue;
+				}
+				else // Room
+					detectedARoom = true;
 
 				if (cell.hideFromMap ||
 					!room.potentialDoorPositions.Contains(actualPos)) // It should be potential doors, why did I put entity safe cells lmao
 				{
-					//Debug.Log("Invalid position to be in");
+					Debug.Log("Invalid position to be in!");
 					__result = false;
 					return false;
 				}
 			}
-			//Debug.Log("Position is suitable: " + isThisElevatorSuitableForRooms);
+
+			if (detectedAHall && detectedARoom) // If both are true, the elevator is in a bad spot
+			{
+				Debug.Log("Invalid position to be in!");
+				__result = false;
+			}
 
 			return false;
 		}
