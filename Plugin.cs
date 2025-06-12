@@ -115,17 +115,19 @@ namespace ElevatorsInSpecialRooms
 
 				//Debug.Log($"Positions checked: {actualPos.ToString()} and room ({(room.name)})");
 
-				if (room.type == RoomType.Hall) // Hallway
+				switch (room.type)
 				{
-					detectedAHall = true;
-					continue;
+					case RoomType.Hall:
+						detectedAHall = true;
+						continue;
+					case RoomType.Room:
+						detectedARoom = true;
+						break;
+					default: continue;
 				}
-				else if (room.type == RoomType.Room) // Room
-					detectedARoom = true;
-				// RoomType.Null isn't a thing to check for
 
 				if (cell.hideFromMap ||
-					!room.potentialDoorPositions.Contains(actualPos)) // It should be potential doors, why did I put entity safe cells lmao
+						!room.potentialDoorPositions.Contains(actualPos)) // It should be potential doors, why did I put entity safe cells lmao
 				{
 					//Debug.Log("Invalid position to be in!");
 					__result = false;
