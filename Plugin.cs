@@ -56,13 +56,13 @@ namespace ElevatorsInSpecialRooms
 	[HarmonyPatch(typeof(LevelBuilder))]
 	internal static class LevelBuilderPatch
 	{
-		[HarmonyPatch(typeof(PlayerMovement), nameof(PlayerMovement.PlayerMove))]
-		[HarmonyPrefix]
-		static void GetPosition(PlayerMovement __instance)
-		{
-			if (Input.GetKeyDown(KeyCode.F))
-				Debug.LogError("Player pos is: " + IntVector2.GetGridPosition(__instance.transform.position).ToString());
-		}
+		// [HarmonyPatch(typeof(PlayerMovement), nameof(PlayerMovement.PlayerMove))]
+		// [HarmonyPrefix]
+		// static void GetPosition(PlayerMovement __instance)
+		// {
+		// 	if (Input.GetKeyDown(KeyCode.F))
+		// 		Debug.LogError("Player pos is: " + IntVector2.GetGridPosition(__instance.transform.position).ToString());
+		// }
 
 		// // [HarmonyPatch(typeof(EnvironmentController), "SetTileInstantiation")]
 		// // [HarmonyPostfix]
@@ -102,8 +102,8 @@ namespace ElevatorsInSpecialRooms
 				}
 			}
 
-			Debug.Log("----------- POSITION: " + position.ToString() + "----------");
-			Debug.Log("----- CHECKING ELEVATOR FOR DIRECTION " + direction + " -----");
+			//Debug.Log("----------- POSITION: " + position.ToString() + "----------");
+			//Debug.Log("----- CHECKING ELEVATOR FOR DIRECTION " + direction + " -----");
 
 			bool detectedARoom = false, detectedAHall = false;
 
@@ -113,20 +113,21 @@ namespace ElevatorsInSpecialRooms
 				var cell = __instance.Ec.CellFromPosition(actualPos);
 				var room = cell.room;
 
-				Debug.Log($"Positions checked: {actualPos.ToString()} and room ({(room.name)})");
+				//Debug.Log($"Positions checked: {actualPos.ToString()} and room ({(room.name)})");
 
-				if (room.type != RoomType.Room) // Hallway
+				if (room.type == RoomType.Hall) // Hallway
 				{
 					detectedAHall = true;
 					continue;
 				}
-				else // Room
+				else if (room.type == RoomType.Room) // Room
 					detectedARoom = true;
+				// RoomType.Null isn't a thing to check for
 
 				if (cell.hideFromMap ||
 					!room.potentialDoorPositions.Contains(actualPos)) // It should be potential doors, why did I put entity safe cells lmao
 				{
-					Debug.Log("Invalid position to be in!");
+					//Debug.Log("Invalid position to be in!");
 					__result = false;
 					return false;
 				}
@@ -134,7 +135,7 @@ namespace ElevatorsInSpecialRooms
 
 			if (detectedAHall && detectedARoom) // If both are true, the elevator is in a bad spot
 			{
-				Debug.Log("Invalid position to be in!");
+				//Debug.Log("Invalid position to be in!");
 				__result = false;
 			}
 
