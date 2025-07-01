@@ -266,16 +266,16 @@ namespace ElevatorsInSpecialRooms
 				new(OpCodes.Ldloc_2),
 				new(OpCodes.Ldloc_2),
 				new(CodeInstruction.LoadField(typeof(LevelBuilder), "ld")),
-				new(CodeInstruction.LoadField(typeof(LevelObject), "elevatorRoom")),
+				new(CodeInstruction.LoadField(typeof(LevelGenerationParameters), "elevatorRoom")),
 				new(OpCodes.Ldnull),
-				new(OpCodes.Ldloc_S, name: "V_57"),
+				new(OpCodes.Ldloc_S, name: "V_56"),
 				new(OpCodes.Ldarg_0),
 				new(OpCodes.Ldfld, connectDirField),
 				new(CodeInstruction.Call(typeof(Directions), "ToIntVector2", [typeof(Direction)])),
 				new(CodeInstruction.Call(typeof(IntVector2), "op_Addition", [typeof(IntVector2), typeof(IntVector2)])),
 				new(OpCodes.Ldloc_2),
 				new(CodeInstruction.LoadField(typeof(LevelBuilder), "ld")),
-				new(CodeInstruction.LoadField(typeof(LevelObject), "elevatorRoom")),
+				new(CodeInstruction.LoadField(typeof(LevelGenerationParameters), "elevatorRoom")),
 				new(CodeInstruction.LoadField(typeof(RoomAsset), "potentialDoorPositions")),
 				new(OpCodes.Ldc_I4_0),
 				new(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(List<IntVector2>), "Item")),
@@ -348,19 +348,19 @@ namespace ElevatorsInSpecialRooms
 				new(OpCodes.Ldarg_0),
 				new(OpCodes.Ldloc_2),
 				new(CodeInstruction.LoadField(typeof(LevelBuilder), "ld")),
-				new(CodeInstruction.LoadField(typeof(LevelObject), "exitCount"))
+				new(CodeInstruction.LoadField(typeof(LevelGenerationParameters), "exitCount"))
 				)
 				.MatchForward(false,
-				new CodeMatch(OpCodes.Stloc_S, name: "V_56")
+				new CodeMatch(OpCodes.Stloc_S, name: "V_55")
 				);
 
-			var v56 = codematcher.Instruction.operand;
+			var v55 = codematcher.Instruction.operand;
 
 			codematcher.MatchForward(false, new CodeMatch(OpCodes.Stfld, xField))
 				.Advance(1)
 				.InsertAndAdvance(
 				new(OpCodes.Ldc_I4_1),
-				new(OpCodes.Stloc_S, v56), // min X = 1
+				new(OpCodes.Stloc_S, v55), // min X = 1
 
 				new(OpCodes.Ldarg_0),
 				new(OpCodes.Ldloc_2),
