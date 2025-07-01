@@ -96,14 +96,17 @@ namespace ElevatorsInSpecialRooms
 				!__instance.ec.CellFromPosition(intVector).Null
 				)
 				{
+#if DEBUG
 					Debug.Log("invalid room name: " + __instance.ec.CellFromPosition(intVector).room.name);
+#endif
 					__result = false;
 					return false;
 				}
 			}
-
-			//Debug.Log("----------- POSITION: " + position.ToString() + "----------");
-			//Debug.Log("----- CHECKING ELEVATOR FOR DIRECTION " + direction + " -----");
+#if DEBUG
+			Debug.Log("----------- POSITION: " + position.ToString() + "----------");
+			Debug.Log("----- CHECKING ELEVATOR FOR DIRECTION " + direction + " -----");
+#endif
 
 			bool detectedARoom = false, detectedAHall = false;
 
@@ -129,7 +132,9 @@ namespace ElevatorsInSpecialRooms
 				if (cell.hideFromMap ||
 						!room.potentialDoorPositions.Contains(actualPos)) // It should be potential doors, why did I put entity safe cells lmao
 				{
-					//Debug.Log("Invalid position to be in!");
+#if DEBUG
+					Debug.Log("Invalid position to be in!");
+#endif
 					__result = false;
 					return false;
 				}
@@ -137,7 +142,9 @@ namespace ElevatorsInSpecialRooms
 
 			if (detectedAHall && detectedARoom) // If both are true, the elevator is in a bad spot
 			{
-				//Debug.Log("Invalid position to be in!");
+#if DEBUG
+				Debug.Log("Invalid position to be in!");
+#endif
 				__result = false;
 			}
 
